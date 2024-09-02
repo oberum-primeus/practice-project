@@ -37,6 +37,17 @@ public class GreetController {
         }
     }
 
+    // create a personalized greeting for a generated name from merging two provided names
+    @PostMapping("/merger")
+    public ResponseEntity<String> nameMergedGreeting (@RequestParam String name1, @RequestParam String name2) {
+        try {
+            GreetModel greeting = greetService.nameMerger(name1, name2);
+            return ResponseEntity.ok(greeting.getMessage());
+        } catch (Exception err) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured: " + err.getMessage());
+        }
+    }
+
     // adds/removes a message as a favorite
     @PatchMapping("/{id}/favorite")
     public ResponseEntity<GreetModel> markAsFave (

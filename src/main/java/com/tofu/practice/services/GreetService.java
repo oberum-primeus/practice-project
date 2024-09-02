@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +49,37 @@ public class GreetService {
         return greetRepo.save(greeting);
     }
 
+    // create a personalized greeting for a generated name from merging two provided names
+    public GreetModel nameMerger(String name1, String name2) {
+        // check if the name is only whitespaces/blank
+        if (name1.replaceAll("\\s", "").isEmpty() || name2.replaceAll("\\s", "").isEmpty()) {
+            throw new IllegalArgumentException("No name/s was provided!");
+        }
+
+        // initialize variables
+        String beginningName = "";
+        String endingName = "";
+
+        // merge the names
+        for (int i = 1; i < name1.length(); i++) {
+            // syllable separator following V-C pattern
+            if (isVowel(name1.charAt(i)) && !isVowel(name1.charAt(i - 1))) {
+                beginningName = name1.substring(0, i);
+            }
+        }
+
+        for (int i = 1; i < name2.length(); i++) {
+            // syllable separator following V-C pattern
+            if (isVowel(name2.charAt(i)) && !isVowel(name2.charAt(i - 1))) {
+                endingName = name2.substring(i, name2.length());
+            }
+        }
+
+        String mergedName = beginningName + endingName;
+
+        return personalGreeting(mergedName);
+    }
+
     public List<GreetModel> getAllGreetings() {
         return greetRepo.findAll();
     }
@@ -77,5 +109,28 @@ public class GreetService {
         } catch (Exception err) {
             throw new IllegalArgumentException("No messages found with keyword: " + keyword);
         }
+    }
+
+    // ==================================== Miscellaneous Methods ====================================
+    // method for separating a string into syllables
+    public static List<String> separateSyllables (String word) {
+        // initialize variables
+        List<String> syllables = new ArrayList<>();
+        int start = 0;
+
+        // separate the name into syllables
+        for (int i = 1; i < word.length(); i++) {
+            if (isVowel(word.charAt(i)) && !isVowel(word.charAt(i - 1))) {
+                syllables.add(word.substring(start, i));
+                start = i;
+            }
+        }
+        syllables.add(word.substring(start));
+        return syllables;
+    }
+
+    // method used for checking if the current character is a vowel
+    private static boolean isVowel(char c) {
+        return "aeiouAEIOU".indexOf(c) != -1;
     }
 }
